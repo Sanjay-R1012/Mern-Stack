@@ -21,8 +21,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-      contents: write
-      checks: write
+      contents: read
 
     name: Run PR-Agent
 
@@ -31,53 +30,28 @@ jobs:
         uses: the-pr-agent/pr-agent@main
 
         env:
-          # --------------------------------------------------
-          # GitHub
-          # --------------------------------------------------
+          # GitHub authentication
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          # --------------------------------------------------
-          # OpenRouter
-          # --------------------------------------------------
+          # OpenRouter authentication
           OPENROUTER__KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
-          # --------------------------------------------------
-          # Model
-          #
-          # IMPORTANT:
-          # Use the exact model ID available in OpenRouter.
-          # Example:
-          # openrouter/openai/gpt-5
-          # --------------------------------------------------
+          # Primary model
           config.model: "openrouter/openai/gpt-5"
+
+          # Required because PR-Agent doesn't have this custom
+          # model in its built-in MAX_TOKENS table
+          config.custom_model_max_tokens: "16384"
+
+          # Fallback model
           config.fallback_models: '["openrouter/anthropic/claude-sonnet-4"]'
 
-          # --------------------------------------------------
-          # OpenRouter settings
-          # --------------------------------------------------
-          openrouter.reasoning_effort: "medium"
-
-          # --------------------------------------------------
-          # Automatic PR actions
-          # --------------------------------------------------
+          # Automatically review PRs
           github_action_config.auto_review: "true"
-          github_action_config.auto_describe: "false"
-          github_action_config.auto_improve: "false"
 
-          # Run review automatically for these events
-          github_action_config.pr_actions: '["opened", "reopened", "synchronize", "ready_for_review"]'
-
-          # --------------------------------------------------
           # Review configuration
-          # --------------------------------------------------
           pr_reviewer.require_tests_review: "true"
-
-          # --------------------------------------------------
-          # Code suggestions
-          # --------------------------------------------------
           pr_code_suggestions.num_code_suggestions: "5"
 
-          # --------------------------------------------------
-          # Timeout
-          # --------------------------------------------------
-          config.ai_timeout: "300"
+          # Reasoning
+          openrouter.reasoning_effort: "medium"
